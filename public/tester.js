@@ -54,7 +54,21 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 });
 
+document.getElementById("copyBtn").addEventListener("click", () => {
+    if (tokenEl.value) {
+        navigator.clipboard.writeText(tokenEl.value);
+        alert("Token copié ! 📋");
+    } else {
+        alert("Pas de token. Connecte-toi d'abord.");
+    }
+});
+
 document.getElementById("meBtn").addEventListener("click", async () => {
+    if (!tokenEl.value) {
+        printResult("Me", 401, { message: "Pas de token. Connecte-toi d'abord." });
+        return;
+    }
+    
     await callApi("Me", `${baseUrl}/api/auth/me`, {
         method: "GET",
         headers: {

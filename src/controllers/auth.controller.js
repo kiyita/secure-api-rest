@@ -1,6 +1,6 @@
 import bycrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-import User from '../models/User.js';
+import { mockDb } from '../mockDb.js';
 
 // Contrôleur pour l'inscription d'un utilisateur
 export const register = async (req, res, next) => {
@@ -12,7 +12,7 @@ export const register = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid input data' });
         }
         //vérif si déjà existant
-        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        const existingUser = await mockDb.findUserByEmail(email);
         if (existingUser) {
             return res.status(409).json({ message: 'Unable to process request' });
         }
@@ -21,10 +21,7 @@ export const register = async (req, res, next) => {
         const hashedPassword = await bycrypt.hash(password, 12);
 
         //créer user
-        const user = await User.create({
-            email: email.toLowerCase(),
-            password: hashedPassword,
-        });
+        const user = await mockDb.createUser(email.toLowerCase(), hashedPassword);
 
         // réponse sans password
         return res.status(201).json({
@@ -51,7 +48,7 @@ export const login = async (req, res, next) => {
         }
 
         //vérif si utilisateur existe
-        const user = await User.findOne({ email: email.toLowerCase() });
+        const user = await mockDb.findUserByEmail(email);
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -74,4 +71,27 @@ export const login = async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
+};
+
+
+// fonction me
+export const me = async (req, res, next) => {
+    try {
+        //req.user.id vient du middleware auth
+        const user = await mockDb.findUserById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        return res.status(200).json({ 
+            user: {
+                id: user._id,
+                email: user.email,
+                createdAt: user.createdAt,
+            }
+        });
+    } catch (error) {
+        return next(error);
+    }   
 };

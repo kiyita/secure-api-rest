@@ -10,7 +10,7 @@
     <small>Base URL: <span id="baseUrl"></span></small>
 
     <div class="card">
-      <h2>Identifiants de test</h2>
+      <h2>1️⃣ Inscription</h2>
       <div class="row">
         <div>
           <label for="email">Email</label>
@@ -22,11 +22,23 @@
         </div>
       </div>
       <button id="registerBtn">POST /api/auth/register</button>
+    </div>
+
+    <div class="card">
+      <h2>2️⃣ Connexion</h2>
       <button id="loginBtn">POST /api/auth/login</button>
     </div>
 
     <div class="card">
-      <h2>Réponse</h2>
+      <h2>3️⃣ Token JWT</h2>
+      <label for="token">Access Token</label>
+      <input id="token" type="text" placeholder="Se remplit automatiquement après login" readonly />
+      <button id="copyBtn" class="copy-btn">Copier le token</button>
+      <button id="meBtn">GET /api/auth/me (protégée)</button>
+    </div>
+
+    <div class="card">
+      <h2>📋 Réponse</h2>
       <pre id="output">Cliquez sur un bouton pour tester...</pre>
     </div>
 
