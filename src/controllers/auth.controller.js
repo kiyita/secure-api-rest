@@ -1,6 +1,6 @@
 import bycrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-import { mockDb } from '../mockDb.js';
+import { db } from '../switch.js';
 
 /**
  * Enregistrer un nouvel utilisateur avec email et mot de passe
@@ -23,7 +23,7 @@ export const register = async (req, res, next) => {
             return res.status(400).json({ message: 'Invalid input data' });
         }
         //vérif si déjà existant
-        const existingUser = await mockDb.findUserByEmail(email);
+        const existingUser = await db.findUserByEmail(email);
         if (existingUser) {
             return res.status(409).json({ message: 'Unable to process request' });
         }
@@ -32,7 +32,7 @@ export const register = async (req, res, next) => {
         const hashedPassword = await bycrypt.hash(password, 12);
 
         //créer user
-        const user = await mockDb.createUser(email.toLowerCase(), hashedPassword);
+        const user = await db.createUser(email.toLowerCase(), hashedPassword);
 
         // réponse sans password
         return res.status(201).json({
@@ -72,7 +72,7 @@ export const login = async (req, res, next) => {
         }
 
         //vérif si utilisateur existe
-        const user = await mockDb.findUserByEmail(email);
+        const user = await db.findUserByEmail(email);
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
@@ -112,7 +112,7 @@ export const login = async (req, res, next) => {
 export const me = async (req, res, next) => {
     try {
         //req.user.id vient du middleware auth
-        const user = await mockDb.findUserById(req.user.id);
+        const user = await db.findUserById(req.user.id);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
