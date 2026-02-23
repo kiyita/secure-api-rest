@@ -5,6 +5,7 @@ A secure REST API for managing private notes with encryption and authentication.
 # NPM
 express mongoose bcrypt jsonwebtoken dotenv helmet express-rate-limit  
 nodemon
+jsdoc
 
 # Ressources & other
 https://www.npmjs.com/package/mongoose

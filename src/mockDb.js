@@ -1,3 +1,6 @@
+/**
+ * Mock BDD faites par IA
+ */
 // Mock in-memory database
 let users = [];
 

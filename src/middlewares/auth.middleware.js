@@ -1,5 +1,23 @@
 import jwt from "jsonwebtoken";
 
+/**
+ * Middleware pour authentifier les requêtes en utilisant des tokens JWT.
+ * 
+ * Valide l'en-tête Authorization, extrait le token JWT,
+ * le vérifie par rapport au secret JWT, et attache les informations
+ * utilisateur décodées à l'objet requête.
+ * 
+ * @param {Object} req - Objet requête Express
+ * @param {Object} req.headers - En-têtes de la requête
+ * @param {string} req.headers.authorization - En-tête Authorization au format "Bearer <token>"
+ * @param {Object} res - Objet réponse Express
+ * @param {Function} next - Fonction middleware Express suivante
+ * @returns {void}
+ * @throws {Error} Retourne 401 Non autorisé si:
+ *   - L'en-tête Authorization est manquant
+ *   - Le format de l'en-tête Authorization est invalide (pas "Bearer <token>")
+ *   - Le token JWT est invalide ou expiré
+ */
 export const authMiddleware =   (req, res, next) => {
     try {
         // lire le header Authorization

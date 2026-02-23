@@ -2,8 +2,11 @@ import express from 'express';
 import helmet from 'helmet';
 import authRoutes from './routes/auth.routes.js';
 
+/** Démarrage de l'application Express */
+
 const app = express();
 
+// Middleware de sécurité avec Helmet
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -13,6 +16,7 @@ app.use(helmet({
   },
 }));
 
+// Middleware pour parser le JSON avec une limite de taille
 app.use(express.json({ limit: "10kb" }));
 app.use(express.static('public'));
 
