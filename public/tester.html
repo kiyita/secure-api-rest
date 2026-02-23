@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure API Tester</title>
+  </head>
+  <body>
+    <h1>🔐 Secure Notes API - Tester</h1>
+    <small>Base URL: <span id="baseUrl"></span></small>
+
+    <div class="card">
+      <h2>Identifiants de test</h2>
+      <div class="row">
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" value="lucie@test.com" />
+        </div>
+        <div>
+          <label for="password">Mot de passe</label>
+          <input id="password" type="password" value="MonMotDePasse123" />
+        </div>
+      </div>
+      <button id="registerBtn">POST /api/auth/register</button>
+      <button id="loginBtn">POST /api/auth/login</button>
+    </div>
+
+    <div class="card">
+      <h2>Réponse</h2>
+      <pre id="output">Cliquez sur un bouton pour tester...</pre>
+    </div>
+
+    <script src="/tester.js" defer></script>
+  </body>
+</html>

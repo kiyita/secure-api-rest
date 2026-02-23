@@ -1,0 +1,11 @@
+# Secure Notes API
+
+A secure REST API for managing private notes with encryption and authentication.
+
+# NPM
+express mongoose bcrypt jsonwebtoken dotenv helmet express-rate-limit  
+nodemon
+
+# Ressources & other
+https://www.npmjs.com/package/mongoose
+https://www.npmjs.com/package/jsonwebtoken
