@@ -1,6 +1,7 @@
 import express from 'express';
 import helmet from 'helmet';
 import authRoutes from './routes/auth.routes.js';
+import noteRoutes from './routes/note.routes.js';
 
 /** Démarrage de l'application Express */
 
@@ -30,5 +31,7 @@ app.get('/tester', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+
+app.use('/api/notes', noteRoutes);
 
 export default app;

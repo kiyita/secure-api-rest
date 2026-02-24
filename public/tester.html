@@ -38,6 +38,28 @@
     </div>
 
     <div class="card">
+      <h2>4️⃣ Notes - CRUD sécurisé</h2>
+      <div>
+        <label for="noteTitle">Titre</label>
+        <input id="noteTitle" type="text" value="Ma première note" />
+      </div>
+      <div>
+        <label for="noteContent">Contenu</label>
+        <textarea id="noteContent" rows="4">Contenu secret de la note</textarea>
+      </div>
+      <div>
+        <label for="noteId">ID de note</label>
+        <input id="noteId" type="text" placeholder="Se remplit après création" />
+      </div>
+
+      <button id="createNoteBtn">POST /api/notes/notes</button>
+      <button id="getNotesBtn">GET /api/notes/notes</button>
+      <button id="getNoteByIdBtn">GET /api/notes/notes/:id</button>
+      <button id="updateNoteBtn">PUT /api/notes/notes/:id</button>
+      <button id="deleteNoteBtn">DELETE /api/notes/notes/:id</button>
+    </div>
+
+    <div class="card">
       <h2>📋 Réponse</h2>
       <pre id="output">Cliquez sur un bouton pour tester...</pre>
     </div>
