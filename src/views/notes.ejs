@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Mes Notes - Secure Notes</title>
+	</head>
+	<body>
+		<main>
+			<h1>Mes notes</h1>
+
+			<div>
+				<button id="refreshBtn" type="button">Rafraîchir</button>
+				<button id="logoutBtn" type="button">Se déconnecter</button>
+				<a href="/connexion">Connexion</a>
+			</div>
+
+			<hr />
+
+			<section>
+				<h2 id="formTitle">Nouvelle note</h2>
+				<form id="noteForm">
+					<input type="hidden" id="noteId" />
+
+					<label for="title">Titre</label>
+					<input id="title" name="title" type="text" required />
+
+					<label for="content">Contenu</label>
+					<textarea id="content" name="content" rows="5" required></textarea>
+
+					<div>
+						<button type="submit" id="saveBtn">Enregistrer</button>
+						<button type="button" id="cancelEditBtn">Annuler modification</button>
+					</div>
+				</form>
+			</section>
+
+			<p id="message"></p>
+
+			<section>
+				<h2>Liste</h2>
+				<ul id="notesList"></ul>
+			</section>
+		</main>
+
+		<script>
+			const token = localStorage.getItem('accessToken');
+			if (!token) {
+				window.location.href = '/connexion';
+			}
+
+			const notesList = document.getElementById('notesList');
+			const noteForm = document.getElementById('noteForm');
+			const noteIdInput = document.getElementById('noteId');
+			const titleInput = document.getElementById('title');
+			const contentInput = document.getElementById('content');
+			const message = document.getElementById('message');
+			const formTitle = document.getElementById('formTitle');
+			const baseUrl = window.location.origin;
+
+			function showMessage(text, isError = false) {
+				message.textContent = text;
+				message.style.color = isError ? 'crimson' : 'green';
+			}
+
+			function resetForm() {
+				noteIdInput.value = '';
+				titleInput.value = '';
+				contentInput.value = '';
+				formTitle.textContent = 'Nouvelle note';
+			}
+
+			async function apiCall(endpoint, options = {}) {
+				const response = await fetch(`${baseUrl}${endpoint}`, {
+					...options,
+					headers: {
+						Authorization: `Bearer ${token}`,
+						...(options.headers || {}),
+					},
+				});
+
+				const text = await response.text();
+				let data;
+				try {
+					data = text ? JSON.parse(text) : {};
+				} catch {
+					data = { message: 'Réponse serveur invalide' };
+				}
+
+				return { ok: response.ok, status: response.status, data };
+			}
+
+			function mapNoteId(note) {
+				return note._id || note.id;
+			}
+
+			function renderNotes(notes) {
+				notesList.innerHTML = '';
+
+				if (!notes || notes.length === 0) {
+					const empty = document.createElement('li');
+					empty.textContent = 'Aucune note.';
+					notesList.appendChild(empty);
+					return;
+				}
+
+				for (const note of notes) {
+					const id = mapNoteId(note);
+					const li = document.createElement('li');
+
+					const title = document.createElement('strong');
+					title.textContent = note.title;
+
+					const content = document.createElement('p');
+					content.textContent = note.content;
+
+					const editBtn = document.createElement('button');
+					editBtn.type = 'button';
+					editBtn.textContent = 'Modifier';
+					editBtn.addEventListener('click', () => {
+						noteIdInput.value = id;
+						titleInput.value = note.title;
+						contentInput.value = note.content;
+						formTitle.textContent = 'Modifier la note';
+					});
+
+					const deleteBtn = document.createElement('button');
+					deleteBtn.type = 'button';
+					deleteBtn.textContent = 'Supprimer';
+					deleteBtn.addEventListener('click', async () => {
+						if (!confirm('Supprimer cette note ?')) {
+							return;
+						}
+
+						const result = await apiCall(`/api/notes/notes/${id}`, {
+							method: 'DELETE',
+						});
+
+						if (!result.ok) {
+							showMessage(result.data.message || 'Erreur suppression.', true);
+							return;
+						}
+
+						showMessage('Note supprimée.');
+						resetForm();
+						await loadNotes();
+					});
+
+					li.appendChild(title);
+					li.appendChild(content);
+					li.appendChild(editBtn);
+					li.appendChild(deleteBtn);
+					notesList.appendChild(li);
+				}
+			}
+
+			async function loadNotes() {
+				const result = await apiCall('/api/notes/notes', { method: 'GET' });
+
+				if (!result.ok) {
+					if (result.status === 401) {
+						localStorage.removeItem('accessToken');
+						window.location.href = '/connexion';
+						return;
+					}
+
+					showMessage(result.data.message || 'Erreur chargement notes.', true);
+					return;
+				}
+
+				renderNotes(result.data.notes || []);
+			}
+
+			noteForm.addEventListener('submit', async (event) => {
+				event.preventDefault();
+
+				const payload = {
+					title: titleInput.value.trim(),
+					content: contentInput.value.trim(),
+				};
+
+				if (!payload.title || !payload.content) {
+					showMessage('Titre et contenu obligatoires.', true);
+					return;
+				}
+
+				const noteId = noteIdInput.value;
+				const endpoint = noteId ? `/api/notes/notes/${noteId}` : '/api/notes/notes';
+				const method = noteId ? 'PUT' : 'POST';
+
+				const result = await apiCall(endpoint, {
+					method,
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(payload),
+				});
+
+				if (!result.ok) {
+					showMessage(result.data.message || 'Erreur sauvegarde.', true);
+					return;
+				}
+
+				showMessage(noteId ? 'Note modifiée.' : 'Note créée.');
+				resetForm();
+				await loadNotes();
+			});
+
+			document.getElementById('cancelEditBtn').addEventListener('click', () => {
+				resetForm();
+			});
+
+			document.getElementById('refreshBtn').addEventListener('click', async () => {
+				await loadNotes();
+			});
+
+			document.getElementById('logoutBtn').addEventListener('click', () => {
+				localStorage.removeItem('accessToken');
+				window.location.href = '/connexion';
+			});
+
+			loadNotes();
+		</script>
+	</body>
+</html>

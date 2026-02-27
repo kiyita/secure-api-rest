@@ -7,6 +7,9 @@ express mongoose bcrypt jsonwebtoken dotenv helmet express-rate-limit
 nodemon
 jsdoc
 
+# Notes
+Pages EJS générées par IA pour l'instant parce que flemme
+
 # Ressources & other
 https://www.npmjs.com/package/mongoose
 https://www.npmjs.com/package/jsonwebtoken

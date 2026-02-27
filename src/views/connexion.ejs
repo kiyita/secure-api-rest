@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Connexion - Secure Notes</title>
+	</head>
+	<body>
+		<main>
+			<h1>Connexion</h1>
+			<p>Connecte-toi ou crée un compte pour accéder à tes notes.</p>
+
+			<form id="authForm">
+				<label for="email">Email</label>
+				<input id="email" name="email" type="email" required placeholder="ex: lucie@test.com" />
+
+				<label for="password">Mot de passe</label>
+				<input id="password" name="password" type="password" minlength="8" required placeholder="Minimum 8 caractères" />
+
+				<div>
+					<button type="button" id="registerBtn">S'inscrire</button>
+					<button type="button" id="loginBtn">Se connecter</button>
+				</div>
+			</form>
+
+			<p id="message"></p>
+			<p><a href="/notes">Aller à la page Notes</a></p>
+		</main>
+
+		<script>
+			const message = document.getElementById('message');
+			const emailInput = document.getElementById('email');
+			const passwordInput = document.getElementById('password');
+			const baseUrl = window.location.origin;
+
+			function showMessage(text, isError = false) {
+				message.textContent = text;
+				message.style.color = isError ? 'crimson' : 'green';
+			}
+
+			function getPayload() {
+				return {
+					email: emailInput.value.trim(),
+					password: passwordInput.value,
+				};
+			}
+
+			async function callApi(endpoint, payload) {
+				const response = await fetch(`${baseUrl}${endpoint}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(payload),
+				});
+
+				const text = await response.text();
+				let data;
+
+				try {
+					data = text ? JSON.parse(text) : {};
+				} catch {
+					data = { message: 'Réponse serveur invalide' };
+				}
+
+				return { ok: response.ok, data };
+			}
+
+			document.getElementById('registerBtn').addEventListener('click', async () => {
+				const payload = getPayload();
+
+				if (!payload.email || !payload.password) {
+					showMessage('Email et mot de passe obligatoires.', true);
+					return;
+				}
+
+				try {
+					const result = await callApi('/api/auth/register', payload);
+
+					if (!result.ok) {
+						showMessage(result.data.message || 'Erreur à l\'inscription.', true);
+						return;
+					}
+
+					showMessage('Inscription réussie. Tu peux maintenant te connecter.');
+				} catch {
+					showMessage('Erreur réseau.', true);
+				}
+			});
+
+			document.getElementById('loginBtn').addEventListener('click', async () => {
+				const payload = getPayload();
+
+				if (!payload.email || !payload.password) {
+					showMessage('Email et mot de passe obligatoires.', true);
+					return;
+				}
+
+				try {
+					const result = await callApi('/api/auth/login', payload);
+
+					if (!result.ok || !result.data.accessToken) {
+						showMessage(result.data.message || 'Identifiants invalides.', true);
+						return;
+					}
+
+					localStorage.setItem('accessToken', result.data.accessToken);
+					showMessage('Connexion réussie. Redirection vers les notes...');
+					setTimeout(() => {
+						window.location.href = '/notes';
+					}, 400);
+				} catch {
+					showMessage('Erreur réseau.', true);
+				}
+			});
+		</script>
+	</body>
+</html>
